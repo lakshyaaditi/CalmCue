@@ -119,6 +119,15 @@
         background:var(--card2); padding:16px;
       }
       .callout p{margin:8px 0 0;color:var(--muted);line-height:1.7;font-size:14px}
+      .callout ol{
+        margin:10px 0 0;
+        padding:0 0 0 18px;
+        color:var(--muted);
+        line-height:1.7;
+        font-size:14px;
+      }
+      .callout li{margin:10px 0}
+      .callout b{color:var(--text)}
 
       /* Scroll reveal (per section) */
       .reveal{
@@ -174,6 +183,7 @@
         </div>
 
         <nav class="links">
+          <a href="#problem">Problem</a>
           <a href="#features">Features</a>
           <a href="#how">How it works</a>
           <a href="#faq">FAQ</a>
@@ -216,6 +226,50 @@
             <h3>Private recaps</h3>
             <p>Opt-in summaries help you rejoin after overload moments.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- NEW: Problem section (at the start) -->
+      <section id="problem" class="reveal">
+        <div class="eyebrow">The problem</div>
+        <h2>Voice rooms get chaotic fast</h2>
+        <p class="sectionSub">
+          In many voice chats, the hard part isn’t what people are saying—it’s the <b>audio dynamics</b>:
+          overlap, interruptions, and sudden loudness changes. For a lot of people (especially neurodivergent folks),
+          that turns into fatigue, anxiety, or “I can’t follow this anymore.”
+        </p>
+
+        <div class="cols2">
+          <div class="card feature">
+            <div class="row">
+              <h3>Overload comes from dynamics</h3>
+              <span class="badge">Not content</span>
+            </div>
+            <p>When multiple people talk at once, the brain does extra work just to parse who’s speaking and what to track.</p>
+            <ul>
+              <li>Sustained overlap makes speech unintelligible</li>
+              <li>Interruptions break turn-taking expectations</li>
+              <li>Loudness spikes trigger stress/avoidance</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Most tools focus on moderation</h3>
+              <span class="badge">We don’t</span>
+            </div>
+            <p>CalmCue is not a toxicity detector. It doesn’t interpret meaning. It just smooths the room so you can stay present.</p>
+            <ul>
+              <li>No sentiment analysis</li>
+              <li>No topic or intent classification</li>
+              <li>Just signals → comfort outputs</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div style="font-weight:700;font-size:14px">Goal</div>
+          <p>Keep the conversation intact, but make it easier on the nervous system.</p>
         </div>
       </section>
 
@@ -271,7 +325,7 @@
               <h3>Focus mode recap</h3>
               <span class="badge">Private</span>
             </div>
-            <p>If chaos stays high, CalmCue can send you a private recap of the last 30–120 seconds—so you can rejoin without stress.</p>
+            <p>If chaos stays high, CalmCue can send you a private recap of the last 15–120 seconds—so you can rejoin without stress.</p>
             <ul>
               <li>Private DM-style card</li>
               <li>Time-window selectable</li>
@@ -414,27 +468,21 @@
       </section>
 
       <section id="sponsors" class="reveal">
-        <div class="eyebrow">Sponsor tools</div>
-        <h2>Optional integrations</h2>
+        <div class="eyebrow">Optional integrations</div>
+        <h2>Tools we plugged in (and why)</h2>
         <p class="sectionSub">
-          Plug in best-in-class tools for captions and private recaps. CalmCue remains dynamics-first.
+          CalmCue stays dynamics-first. These integrations add captions, private recaps, and real observability—without turning into content policing.
         </p>
-
         <div class="cols2">
           <div class="card feature">
             <div class="row">
               <h3>Modulate — Velma Transcribe (captions)</h3>
-              <span class="badge">Captions + rolling transcript</span>
+              <span class="badge">Captions</span>
             </div>
             <p>
-              Generates captions and a rolling transcript (speaker labels + timestamps).
-              Transcript is used only for recap summarization (not moderation).
+              Modulate’s Velma Transcribe gives CalmCue live captions and a rolling transcript with speaker labels and timestamps.
+              We use that transcript only to generate the user’s private recap when they opt in—never for moderation, filtering, or policing.
             </p>
-            <ul>
-              <li><b>Primary:</b> <code style="color:var(--muted2)">POST /api/transcribe</code> → Velma (when <code style="color:var(--muted2)">MODULATE_API_KEY</code> is set)</li>
-              <li><b>Fallback:</b> local <code style="color:var(--muted2)">/public/demo/transcript_mock.json</code> if missing key or API failure</li>
-              <li><b>Boundary:</b> transcript is not used for policing; only recap summarization</li>
-            </ul>
           </div>
 
           <div class="card feature">
@@ -443,13 +491,40 @@
               <span class="badge">Private recap</span>
             </div>
             <p>
-              When chaos stays high for N seconds, CalmCue can ask: “Too chaotic — want a recap?”
-              Recaps summarize the last 30/60/120 seconds (user-selectable).
+              When chaos stays high for a bit, CalmCue can offer a private recap to help you rejoin.
+              We send only the last 15/30/60/120 seconds (your choice) for summarization, and fall back to a lightweight heuristic if needed.
+            </p>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Braintrust — tracing, logs, eval-ready</h3>
+              <span class="badge">Observability + improvement</span>
+            </div>
+            <p>
+              We log focus summaries and session-end events as traces so you can debug any “why did it do that?”
+              moment and build an eval dataset over time.
             </p>
             <ul>
-              <li><b>Trigger:</b> <code style="color:var(--muted2)">chaosScore &gt; k</code> for N seconds</li>
-              <li><b>Primary:</b> server-only <code style="color:var(--muted2)">POST /api/summarize</code> → Airia OpenAI Gateway (via <code style="color:var(--muted2)">AIRIA_API_KEY</code>)</li>
-              <li><b>Fallback:</b> heuristic bullet extraction if no key</li>
+              <li>Inputs + outputs + scores per run</li>
+              <li>Find any session fast (sessionId)</li>
+              <li>Same logs become your eval dataset later</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Lightdash — product dashboards</h3>
+              <span class="badge">Metrics & trends</span>
+            </div>
+            <p>
+              We track how CalmCue behaves over time: reward trends, overlap seconds per policy version,
+              and “first vs second run” improvements after policy learning.
+            </p>
+            <ul>
+              <li>Reward trend</li>
+              <li>Average overlap seconds per policy version</li>
+              <li>First vs second run comparisons</li>
             </ul>
           </div>
         </div>
@@ -457,7 +532,78 @@
         <div class="callout">
           <div style="font-weight:700;font-size:14px">Privacy by design</div>
           <p>
-            Both integrations are opt-in. CalmCue’s core behavior never depends on content understanding—only dynamics signals.
+            Integrations are opt-in. CalmCue’s core behavior never depends on content understanding—only dynamics signals.
+          </p>
+        </div>
+      </section>
+
+      <!-- NEW: Future scope section (at the end) -->
+      <section id="future" class="reveal">
+        <div class="eyebrow">Future scope</div>
+        <h2>From a demo to real teams and real rooms</h2>
+        <p class="sectionSub">
+          CalmCue’s core idea works anywhere people talk over each other—so the natural next step is making it easy to
+          plug into the tools teams already live in.
+        </p>
+
+        <div class="cols2">
+          <div class="card feature">
+            <div class="row">
+              <h3>Team rollout</h3>
+              <span class="badge">Workspaces</span>
+            </div>
+            <p>Shared defaults with personal comfort profiles—so individuals can opt into what helps them without forcing it on everyone.</p>
+            <ul>
+              <li>Workspace-level policy templates</li>
+              <li>Per-user “comfort mode” preferences</li>
+              <li>Admin controls + privacy boundaries</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Zoom / Meet / Teams / rooms</h3>
+              <span class="badge">Integrations</span>
+            </div>
+            <p>Bring dynamics smoothing, gentle turn-taking cues, and private recaps into existing voice/video calls.</p>
+            <ul>
+              <li>Client-side or companion-app audio processing</li>
+              <li>Meeting recap cards per user (opt-in)</li>
+              <li>Room-level analytics (aggregate only)</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Richer “comfort controls”</h3>
+              <span class="badge">Personalization</span>
+            </div>
+            <p>More control over what “calm” means for you—without turning it into moderation.</p>
+            <ul>
+              <li>Adjust sensitivity for overlap vs loudness</li>
+              <li>Different cue styles (toast, subtle UI, haptics)</li>
+              <li>Context modes (standup, brainstorming, social)</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Evaluation + improvement loops</h3>
+              <span class="badge">Evals</span>
+            </div>
+            <p>Use Braintrust logs + user feedback to test changes safely and prove “this actually reduced overload.”</p>
+            <ul>
+              <li>Offline eval sets for summarization</li>
+              <li>A/B tests for nudges and thresholds</li>
+              <li>Policy versioning + measurable outcomes</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div style="font-weight:700;font-size:14px">North star</div>
+          <p>
+            CalmCue becomes a “comfort layer” for voice/video—integrated into the places people already meet, without changing the conversation itself.
           </p>
         </div>
       </section>
