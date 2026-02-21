@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm:*)",
+      "Bash(docker:*)",
+      "Bash(node:*)",
+      "Bash(npm:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(export PATH=\"$PATH:/c/Program Files/nodejs:/c/Users/tripa/AppData/Roaming/npm\" && node --version 2>&1 && npm --version 2>&1)",
+      "Bash(powershell.exe:*)",
+      "Bash(winget install:*)",
+      "Bash(export:*)"
+    ]
+  }
+}

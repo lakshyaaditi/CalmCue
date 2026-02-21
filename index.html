@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>CalmCue — calmer voice rooms</title>
-    <meta name="description" content="Neurodivergent-friendly voice chat UX that reduces sensory overload via real-time audio dynamics adaptation." />
+    <meta
+      name="description"
+      content="Neurodivergent-friendly voice chat UX that reduces sensory overload via real-time audio dynamics adaptation."
+    />
     <style>
       :root{
         --bg:#05060a;
@@ -116,11 +119,29 @@
         background:var(--card2); padding:16px;
       }
       .callout p{margin:8px 0 0;color:var(--muted);line-height:1.7;font-size:14px}
-      .cta{
-        margin-top:14px;border-radius:24px;border:1px solid var(--stroke);
-        padding:18px; background: linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
-        box-shadow:var(--shadow);
+
+      /* Scroll reveal (per section) */
+      .reveal{
+        opacity:.55;
+        transform: translateY(10px);
+        filter: blur(10px);
+        transition: opacity 700ms ease, transform 700ms ease, filter 700ms ease;
+        will-change: opacity, transform, filter;
       }
+      .reveal.is-visible{
+        opacity:1;
+        transform: translateY(0);
+        filter: blur(0);
+      }
+      @media (prefers-reduced-motion: reduce){
+        .reveal{
+          transition:none;
+          transform:none;
+          filter:none;
+          opacity:1;
+        }
+      }
+
       .footer{
         margin-top:44px;padding-top:18px;border-top:1px solid var(--stroke);
         color:var(--muted2);display:flex;flex-direction:column;gap:10px;
@@ -164,6 +185,7 @@
         </div>
       </header>
 
+      <!-- Hero (no reveal; keep immediate) -->
       <section style="padding-top:56px">
         <div class="pill"><span class="dot"></span> Neurodivergent-friendly voice UX (not moderation)</div>
         <h1>
@@ -197,7 +219,7 @@
         </div>
       </section>
 
-      <section id="features">
+      <section id="features" class="reveal">
         <div class="eyebrow">Core features</div>
         <h2>Calmer rooms, same conversation</h2>
         <p class="sectionSub">
@@ -259,7 +281,7 @@
         </div>
       </section>
 
-      <section id="how">
+      <section id="how" class="reveal">
         <div class="eyebrow">How it works</div>
         <h2>Signals in, comfort out</h2>
         <p class="sectionSub">A lightweight pipeline that stays away from content and focuses on dynamics.</p>
@@ -288,7 +310,7 @@
         </div>
       </section>
 
-      <section id="faq">
+      <section id="faq" class="reveal">
         <div class="eyebrow">FAQ</div>
         <h2>Common questions</h2>
         <p class="sectionSub">Clear boundaries, simple answers.</p>
@@ -313,19 +335,134 @@
         </div>
       </section>
 
-      <section>
-        <div class="cta">
-          <div class="eyebrow">Get early access</div>
-          <h2 style="margin-top:10px">Make voice chat feel safer for your nervous system</h2>
-          <p class="sectionSub" style="margin-bottom:0">
-            CalmCue is built for comfort-first communication. No content policing—just smoother dynamics.
-          </p>
-          <div class="heroBtns" style="margin-top:18px">
-            <a class="btn btnPrimary" href="#">Request access</a>
-            <a class="btn" href="#">Email us</a>
+      <section id="policy" class="reveal">
+        <div class="eyebrow">Self-learning policy</div>
+        <h2>Feedback that updates the room—safely</h2>
+        <p class="sectionSub">
+          CalmCue can adapt its dynamics settings based on lightweight feedback—without analyzing what was said.
+          Updates are rate-limited, clamped, and applied only at session end.
+        </p>
+
+        <div class="cols2">
+          <div class="card feature">
+            <div class="row">
+              <h3>In-session feedback</h3>
+              <span class="badge">“Too aggressive” / “Too weak”</span>
+            </div>
+            <p>
+              We aggregate feedback during the session, then apply a single policy update only when the session ends
+              (<code style="color:var(--muted2)">/api/session/end</code>).
+            </p>
+            <ul>
+              <li>Feedback is collected during the call</li>
+              <li>Policy updates apply only at session end</li>
+              <li>UI shows policy vN + a short explanation of what changed</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Safety rails</h3>
+              <span class="badge">Clamped + max 10%</span>
+            </div>
+            <p>
+              Parameter changes are clamped to safe ranges, with a maximum of <b>10%</b> change per session
+              to prevent oscillation or “surprise” behavior.
+            </p>
+            <ul>
+              <li>Clamp parameters to allowed min/max</li>
+              <li>Max 10% delta per session</li>
+              <li>Change summary shown to the user</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Example updates</h3>
+              <span class="badge">Dynamics only</span>
+            </div>
+            <p>What feedback can adjust (examples):</p>
+            <ul>
+              <li><b>Too aggressive</b> → ↑ k, ↑ tSec, ↓ duckingStrength, ↑ toastCooldownMs</li>
+              <li><b>Too weak</b> → ↓ k, ↓ tSec, ↑ duckingStrength, ↓ toastCooldownMs</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Persistence</h3>
+              <span class="badge">Postgres + local cache</span>
+            </div>
+            <p>
+              Each update creates a new <b>Policy vN</b> in Postgres, and caches the latest policy in
+              <b>localStorage</b> so the next run starts from your last known-good settings.
+            </p>
+            <ul>
+              <li>Create Policy vN in Postgres</li>
+              <li>Cache latest in localStorage</li>
+              <li>Restore on next launch</li>
+            </ul>
           </div>
         </div>
 
+        <div class="callout">
+          <div style="font-weight:700;font-size:14px">Boundary</div>
+          <p>
+            Transcripts are not used for policing. Any text is used only for recap summarization when the user opts in.
+          </p>
+        </div>
+      </section>
+
+      <section id="sponsors" class="reveal">
+        <div class="eyebrow">Sponsor tools</div>
+        <h2>Optional integrations</h2>
+        <p class="sectionSub">
+          Plug in best-in-class tools for captions and private recaps. CalmCue remains dynamics-first.
+        </p>
+
+        <div class="cols2">
+          <div class="card feature">
+            <div class="row">
+              <h3>Modulate — Velma Transcribe (captions)</h3>
+              <span class="badge">Captions + rolling transcript</span>
+            </div>
+            <p>
+              Generates captions and a rolling transcript (speaker labels + timestamps).
+              Transcript is used only for recap summarization (not moderation).
+            </p>
+            <ul>
+              <li><b>Primary:</b> <code style="color:var(--muted2)">POST /api/transcribe</code> → Velma (when <code style="color:var(--muted2)">MODULATE_API_KEY</code> is set)</li>
+              <li><b>Fallback:</b> local <code style="color:var(--muted2)">/public/demo/transcript_mock.json</code> if missing key or API failure</li>
+              <li><b>Boundary:</b> transcript is not used for policing; only recap summarization</li>
+            </ul>
+          </div>
+
+          <div class="card feature">
+            <div class="row">
+              <h3>Airia Gateway — Focus mode recap</h3>
+              <span class="badge">Private recap</span>
+            </div>
+            <p>
+              When chaos stays high for N seconds, CalmCue can ask: “Too chaotic — want a recap?”
+              Recaps summarize the last 30/60/120 seconds (user-selectable).
+            </p>
+            <ul>
+              <li><b>Trigger:</b> <code style="color:var(--muted2)">chaosScore &gt; k</code> for N seconds</li>
+              <li><b>Primary:</b> server-only <code style="color:var(--muted2)">POST /api/summarize</code> → Airia OpenAI Gateway (via <code style="color:var(--muted2)">AIRIA_API_KEY</code>)</li>
+              <li><b>Fallback:</b> heuristic bullet extraction if no key</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout">
+          <div style="font-weight:700;font-size:14px">Privacy by design</div>
+          <p>
+            Both integrations are opt-in. CalmCue’s core behavior never depends on content understanding—only dynamics signals.
+          </p>
+        </div>
+      </section>
+
+      <section class="reveal">
         <div class="footer">
           <div>© <span id="y"></span> CalmCue</div>
           <div style="display:flex;gap:18px;flex-wrap:wrap">
@@ -339,6 +476,29 @@
 
     <script>
       document.getElementById("y").textContent = new Date().getFullYear();
+
+      // Per-section reveal, earlier than "top of viewport"
+      const revealSections = Array.from(document.querySelectorAll("section.reveal"));
+
+      if (revealSections.length) {
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const e of entries) {
+              if (e.isIntersecting) e.target.classList.add("is-visible");
+              // If you want it to blur again when scrolling back up, uncomment:
+              // else e.target.classList.remove("is-visible");
+            }
+          },
+          {
+            threshold: 0.08,
+            // Reveal BEFORE the section reaches the top.
+            // More negative => reveals earlier.
+            rootMargin: "0px 0px -35% 0px",
+          }
+        );
+
+        revealSections.forEach((sec) => io.observe(sec));
+      }
     </script>
   </body>
 </html>
