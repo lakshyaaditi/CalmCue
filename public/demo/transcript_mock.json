@@ -1,5 +1,5 @@
 [
-  { "time": 0.0, "speaker": "Speaker A", "text": "Hey everyone, welcome to the design review meeting." },
+  { "time": 0.0, "speaker": "Speaker A", "text": "Hey everyone, welcome to the design review meeting. Blah BLah Blah." },
   { "time": 2.5, "speaker": "Speaker A", "text": "Let's start by going over the user feedback from last sprint." },
   { "time": 5.0, "speaker": "Speaker B", "text": "Oh yeah, I actually had some thoughts on that already." },
   { "time": 6.2, "speaker": "Speaker A", "text": "The main complaint was about the navigation being confusing." },
@@ -23,5 +23,5 @@
   { "time": 27.0, "speaker": "Speaker B", "text": "Okay okay, sorry about that." },
   { "time": 28.0, "speaker": "Speaker A", "text": "Last thing: users want dark mode. It's been requested a lot." },
   { "time": 30.0, "speaker": "Speaker B", "text": "Dark mode is easy, I can do that in a day." },
-  { "time": 31.0, "speaker": "Speaker A", "text": "Alright, now let's prioritize these items together." }
+  { "time": 31.0, "speaker": "Speaker A", "text": "Alright, now let's prioritize these items together. Broooooo" }
 ]

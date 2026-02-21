@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { transcribe } from "@/lib/transcribe";
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    const body = await request.json().catch(() => ({}));
-    const audioPath = body.audioPath as string | undefined;
-    const entries = await transcribe(audioPath);
-    return NextResponse.json({ entries });
+    const entries = await transcribe();
+
+    return NextResponse.json({
+      entries,
+      source: process.env.MODULATE_API_KEY ? "modulate" : "mock",
+    });
   } catch (e) {
     console.error("Transcribe error:", e);
     return NextResponse.json(
