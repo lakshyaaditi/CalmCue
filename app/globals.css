@@ -1,29 +1,64 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0f0f14;
-  --surface: #1a1a24;
-  --surface2: #252534;
-  --border: #2e2e42;
-  --text: #e4e4ef;
-  --text-muted: #8888a0;
+  --bg: #05060a;
+  --surface: rgba(255,255,255,.06);
+  --surface2: rgba(0,0,0,.22);
+  --border: rgba(255,255,255,.10);
+  --text: rgba(255,255,255,.92);
+  --text-muted: rgba(255,255,255,.70);
+  --text-muted2: rgba(255,255,255,.55);
   --accent: #7c6ef0;
   --accent-light: #a59cf8;
   --green: #4ade80;
   --yellow: #facc15;
   --red: #f87171;
   --orange: #fb923c;
+  --shadow: 0 18px 60px rgba(0,0,0,.45);
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
+}
+
+/* Dot grid background overlay */
+.grid-dots {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .38;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.08) 1px, transparent 0);
+  background-size: 28px 28px;
+  z-index: 0;
+}
+
+/* Multi-color glow overlay */
+.glow-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(700px 520px at 50% -10%, rgba(99,102,241,.20), transparent 70%),
+    radial-gradient(520px 420px at 10% 35%, rgba(16,185,129,.12), transparent 70%),
+    radial-gradient(620px 420px at 90% 40%, rgba(236,72,153,.10), transparent 70%),
+    linear-gradient(to bottom, rgba(30,27,75,.30), rgba(5,6,10,1) 45%, rgba(5,6,10,1));
+}
+
+/* Glass-morphism card */
+.glass-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
 /* Toast animation */

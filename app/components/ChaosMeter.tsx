@@ -30,10 +30,9 @@ export function ChaosMeter({
 
   return (
     <div
-      className={`rounded-xl p-4 transition-all duration-300 ${
+      className={`glass-card p-4 transition-all duration-300 ${
         aboveThreshold ? "chaos-danger" : score > 30 ? "chaos-glow" : ""
       }`}
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
     >
       <h2 className="text-sm font-semibold mb-3 uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
         Chaos Meter

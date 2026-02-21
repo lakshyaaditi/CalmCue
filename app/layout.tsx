@@ -13,7 +13,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased min-h-screen">{children}</body>
+      <body className="antialiased min-h-screen">
+        <div className="grid-dots" />
+        <div className="glow-bg" />
+        <div className="relative z-10">{children}</div>
+      </body>
     </html>
   );
 }

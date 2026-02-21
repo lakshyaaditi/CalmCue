@@ -19,11 +19,7 @@ export function ToastStack({
       {toasts.map((t) => (
         <div
           key={t.id}
-          className="toast-enter flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg cursor-pointer"
-          style={{
-            background: "var(--surface2)",
-            border: "1px solid var(--border)",
-          }}
+          className="toast-enter glass-card flex items-center gap-3 px-4 py-3 cursor-pointer"
           onClick={() => onDismiss(t.id)}
         >
           <span className="text-lg">🤫</span>

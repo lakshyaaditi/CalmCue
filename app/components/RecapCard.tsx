@@ -16,11 +16,8 @@ export function RecapCard({
   return (
     <div className="fixed bottom-4 right-4 z-40 max-w-sm w-full">
       <div
-        className="rounded-xl p-4 shadow-lg border"
-        style={{
-          background: "var(--surface)",
-          borderColor: "var(--accent)",
-        }}
+        className="glass-card p-4"
+        style={{ borderColor: "var(--accent)" }}
       >
         <div className="flex items-center justify-between mb-2">
           <h3

@@ -10,8 +10,7 @@ export function FocusPrompt({
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div
-        className="pulse-border rounded-xl p-6 max-w-md w-full mx-4 border-2"
-        style={{ background: "var(--surface)" }}
+        className="pulse-border glass-card p-6 max-w-md w-full mx-4 border-2"
       >
         <h3
           className="text-lg font-semibold mb-2"

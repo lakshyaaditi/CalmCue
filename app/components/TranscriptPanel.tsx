@@ -19,8 +19,7 @@ export function TranscriptPanel({ lines }: { lines: TranscriptLine[] }) {
 
   return (
     <div
-      className="rounded-xl p-4 h-[500px] flex flex-col"
-      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}
+      className="glass-card p-4 h-[500px] flex flex-col"
     >
       <h2 className="text-sm font-semibold mb-3 uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
         Transcript

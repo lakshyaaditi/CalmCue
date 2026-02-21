@@ -318,15 +318,26 @@ export default function Home() {
 
   return (
     <main className="min-h-screen p-4 md:p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <header className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "var(--accent-light)" }}>
-            CalmCue
-          </h1>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Neurodivergent-friendly voice chat UX
-          </p>
+      {/* Header — glass nav bar matching index.html */}
+      <header className="glass-card flex items-center justify-between gap-3.5 px-3.5 py-3 mb-6">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-[38px] h-[38px] rounded-[14px] p-px"
+            style={{ background: "linear-gradient(135deg, rgba(99,102,241,.7), rgba(16,185,129,.7))" }}
+          >
+            <div
+              className="w-full h-full rounded-[13px] flex items-center justify-center font-bold"
+              style={{ background: "var(--bg)" }}
+            >
+              C
+            </div>
+          </div>
+          <div>
+            <div className="font-bold text-sm leading-tight">CalmCue</div>
+            <div className="text-xs" style={{ color: "var(--text-muted2, var(--text-muted))" }}>
+              calmer voice rooms
+            </div>
+          </div>
         </div>
         <PolicyBadge version={policyVersion} explanation={policyExplanation} />
       </header>
@@ -339,8 +350,8 @@ export default function Home() {
         {!isRunning && !sessionEnded && (
           <button
             onClick={startDemo}
-            className="px-6 py-3 rounded-lg font-semibold text-white transition-all hover:scale-105"
-            style={{ background: "var(--accent)" }}
+            className="px-6 py-3 rounded-[14px] font-bold text-sm transition-all hover:opacity-90"
+            style={{ background: "#fff", color: "#000", border: "none" }}
           >
             Run Demo Session
           </button>
@@ -349,22 +360,22 @@ export default function Home() {
           <>
             <button
               onClick={endSession}
-              className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
-              style={{ background: "var(--surface2)", border: "1px solid var(--border)" }}
+              className="px-6 py-3 rounded-[14px] text-sm transition-all hover:bg-white/10"
+              style={{ background: "var(--surface)", border: "1px solid var(--border)", backdropFilter: "blur(10px)" }}
             >
               End Session
             </button>
             <button
               onClick={() => handleFeedback("aggressive")}
-              className="px-4 py-2 rounded-lg text-sm transition-all hover:scale-105"
-              style={{ background: "var(--surface2)", border: "1px solid var(--red)", color: "var(--red)" }}
+              className="px-4 py-2 rounded-[14px] text-sm transition-all hover:bg-white/10"
+              style={{ background: "var(--surface)", border: "1px solid var(--red)", color: "var(--red)", backdropFilter: "blur(10px)" }}
             >
               Too Aggressive
             </button>
             <button
               onClick={() => handleFeedback("weak")}
-              className="px-4 py-2 rounded-lg text-sm transition-all hover:scale-105"
-              style={{ background: "var(--surface2)", border: "1px solid var(--yellow)", color: "var(--yellow)" }}
+              className="px-4 py-2 rounded-[14px] text-sm transition-all hover:bg-white/10"
+              style={{ background: "var(--surface)", border: "1px solid var(--yellow)", color: "var(--yellow)", backdropFilter: "blur(10px)" }}
             >
               Too Weak
             </button>
@@ -378,8 +389,8 @@ export default function Home() {
                 setEndResult(null);
                 startDemo();
               }}
-              className="px-6 py-3 rounded-lg font-semibold text-white transition-all hover:scale-105"
-              style={{ background: "var(--accent)" }}
+              className="px-6 py-3 rounded-[14px] font-bold text-sm transition-all hover:opacity-90"
+              style={{ background: "#fff", color: "#000", border: "none" }}
             >
               Run Demo Session Again
             </button>
@@ -390,8 +401,8 @@ export default function Home() {
       {/* Session end results */}
       {endResult && (
         <div
-          className="mb-6 p-4 rounded-lg border"
-          style={{ background: "var(--surface)", borderColor: "var(--accent)" }}
+          className="glass-card mb-6 p-4"
+          style={{ borderColor: "var(--accent)" }}
         >
           <h3 className="font-semibold mb-2" style={{ color: "var(--accent-light)" }}>
             Session Results
