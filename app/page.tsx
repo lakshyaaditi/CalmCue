@@ -43,6 +43,7 @@ export default function Home() {
   const engineRef = useRef<AudioEngine | null>(null);
   const audioARef = useRef<HTMLAudioElement | null>(null);
   const audioBRef = useRef<HTMLAudioElement | null>(null);
+  const audioContainerRef = useRef<HTMLDivElement | null>(null);
   const toastIdRef = useRef(0);
   const transcriptTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const sessionStartTimeRef = useRef<number>(0);
@@ -123,11 +124,25 @@ export default function Home() {
       }
     } catch {}
 
-    // Init audio engine
-    const audioA = audioARef.current!;
-    const audioB = audioBRef.current!;
+    // Destroy previous engine + audio elements (createMediaElementSource is one-shot)
+    engineRef.current?.destroy();
+    engineRef.current = null;
+    if (audioARef.current) { audioARef.current.pause(); audioARef.current.remove(); }
+    if (audioBRef.current) { audioBRef.current.pause(); audioBRef.current.remove(); }
+
+    // Create fresh audio elements
+    const audioA = document.createElement("audio");
+    audioA.crossOrigin = "anonymous";
+    audioA.preload = "auto";
     audioA.src = "/demo/speakerA.wav";
+    const audioB = document.createElement("audio");
+    audioB.crossOrigin = "anonymous";
+    audioB.preload = "auto";
     audioB.src = "/demo/speakerB.wav";
+    audioContainerRef.current?.appendChild(audioA);
+    audioContainerRef.current?.appendChild(audioB);
+    audioARef.current = audioA;
+    audioBRef.current = audioB;
 
     // Wait for both files to load so Speaker A and B are audible when we play
     await Promise.all([
@@ -316,9 +331,8 @@ export default function Home() {
         <PolicyBadge version={policyVersion} explanation={policyExplanation} />
       </header>
 
-      {/* Hidden audio elements */}
-      <audio ref={audioARef} crossOrigin="anonymous" preload="auto" />
-      <audio ref={audioBRef} crossOrigin="anonymous" preload="auto" />
+      {/* Container for dynamically created audio elements */}
+      <div ref={audioContainerRef} className="hidden" />
 
       {/* Controls */}
       <div className="flex items-center gap-3 mb-6">
