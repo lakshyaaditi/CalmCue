@@ -24,7 +24,7 @@ export function FocusPrompt({
           on what you missed.
         </p>
         <div className="flex gap-2 mb-4">
-          {[30, 60, 120].map((sec) => (
+          {[15, 30, 60, 120].map((sec) => (
             <button
               key={sec}
               onClick={() => onRecap(sec)}

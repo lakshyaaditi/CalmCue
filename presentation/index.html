@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CalmCue — Sensory Overload Shield | Hackathon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/reveal.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/theme/white.min.css" />
+  <style>
+    :root {
+      --calm-teal: #0d9488;
+      --calm-teal-light: #5eead4;
+      --calm-sage: #86efac;
+      --calm-cream: #fafaf9;
+      --calm-ink: #1c1917;
+      --calm-muted: #57534e;
+      --calm-border: #e7e5e4;
+      --calm-accent: #0f766e;
+      --calm-warm: #fef3c7;
+    }
+
+    .reveal {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(160deg, #f0fdfa 0%, #fafaf9 50%, #ecfdf5 100%);
+    }
+    .reveal .slides { text-align: left; }
+    .reveal h1, .reveal h2, .reveal h3 { font-family: 'Outfit', sans-serif; font-weight: 600; }
+    .reveal h1 { font-size: 2.2em; color: var(--calm-ink); }
+    .reveal h2 { font-size: 1.6em; color: var(--calm-accent); border-bottom: 3px solid var(--calm-teal-light); padding-bottom: 0.2em; }
+    .reveal h3 { font-size: 1.2em; color: var(--calm-muted); }
+    .reveal p, .reveal li { color: var(--calm-ink); font-size: 0.95em; line-height: 1.5; }
+    .reveal code { font-family: 'JetBrains Mono', monospace; background: var(--calm-border); padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.9em; }
+
+    .reveal .slide-background { background: transparent !important; }
+
+    /* Title slide */
+    .title-slide { text-align: center !important; }
+    .title-slide h1 { font-size: 2.8em; margin-bottom: 0.3em; }
+    .title-slide .tagline { font-size: 1.15em; color: var(--calm-muted); font-weight: 400; max-width: 20em; margin: 0 auto 1em; }
+    .title-slide .logo { font-weight: 700; color: var(--calm-teal); letter-spacing: 0.02em; }
+    .title-slide .sub { font-size: 0.85em; color: var(--calm-muted); margin-top: 2em; }
+
+    /* Centered content */
+    .center { text-align: center !important; }
+    .center p { margin-left: auto; margin-right: auto; }
+
+    /* Quote / stat callouts */
+    .callout { background: rgba(13, 148, 136, 0.08); border-left: 4px solid var(--calm-teal); padding: 0.8em 1em; margin: 0.8em 0; border-radius: 0 8px 8px 0; }
+    .callout strong { color: var(--calm-accent); }
+    .not-moderation { background: rgba(254, 243, 199, 0.5); border-left-color: #f59e0b; }
+
+    /* Two-column */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; align-items: start; }
+    .two-col ul { margin: 0; padding-left: 1.2em; }
+
+    /* Sponsor badges */
+    .sponsor-row { display: flex; flex-wrap: wrap; gap: 1em; align-items: center; justify-content: center; margin-top: 1em; }
+    .sponsor-badge { background: white; border: 2px solid var(--calm-border); padding: 0.6em 1em; border-radius: 12px; font-weight: 600; color: var(--calm-accent); font-size: 0.9em; }
+    .sponsor-badge span { display: block; font-weight: 400; font-size: 0.75em; color: var(--calm-muted); margin-top: 0.2em; }
+
+    /* Demo slide */
+    .demo-frame { background: var(--calm-ink); color: var(--calm-cream); padding: 1em; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.75em; }
+    .demo-frame .overlay { color: var(--calm-sage); margin-bottom: 0.5em; }
+    .demo-frame .caption { color: var(--calm-teal-light); }
+
+    /* Footer hint */
+    .reveal .slide-number { color: var(--calm-muted); font-size: 0.7em; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- 1. Title -->
+      <section class="title-slide" data-background-transition="fade">
+        <h1><span class="logo">CalmCue</span></h1>
+        <p class="tagline">Neurodivergent-friendly voice chat that reduces sensory overload via real-time audio UX adaptation.</p>
+        <p class="sub">UPenn Hackathon · Sensory Overload Shield</p>
+      </section>
+
+      <!-- 2. Hook -->
+      <section class="center">
+        <p style="font-size: 1.4em; font-weight: 500; color: var(--calm-accent); max-width: 14em; margin: 0 auto;">Voice chat shouldn’t feel like a sensory assault.</p>
+        <p style="margin-top: 0.8em; color: var(--calm-muted);">We fix the <em>sound</em>, not the words.</p>
+      </section>
+
+      <!-- 3. The Problem -->
+      <section>
+        <h2>The problem</h2>
+        <p>Voice calls and meetings can feel <strong>chaotic</strong> for many people—especially those who are neurodivergent or sensitive to auditory overload.</p>
+        <div class="callout">
+          <strong>Not the words.</strong> The <em>dynamics</em>: overlapping voices, sudden volume spikes, rapid interruptions, and no clear “who’s speaking.”
+        </div>
+        <ul>
+          <li>Overlap → hard to parse who said what</li>
+          <li>Shouting spikes → physically overwhelming</li>
+          <li>Interruptions → anxiety and fatigue</li>
+          <li>No recap → “What did I miss?” after zoning out</li>
+        </ul>
+      </section>
+
+      <!-- 4. What we're NOT doing -->
+      <section>
+        <h2>What we’re <em>not</em> building</h2>
+        <div class="callout not-moderation">
+          <strong>This is NOT toxicity or content moderation.</strong> We don’t classify or police what people say.
+        </div>
+        <p>We focus <strong>only</strong> on:</p>
+        <ul>
+          <li>Audio dynamics (loudness, overlap, interruptions)</li>
+          <li>Turn-taking UX (cues, leveling, ducking)</li>
+          <li>Accessibility (captions, focus-mode summaries)</li>
+        </ul>
+        <p>So everyone can stay in the conversation without sensory overload.</p>
+      </section>
+
+      <!-- 5. The Solution -->
+      <section>
+        <h2>The solution: CalmCue</h2>
+        <p>A <strong>real-time voice room</strong> that adapts the <em>experience</em>—not the content.</p>
+        <ul>
+          <li><strong>Dynamic leveling</strong> — keep each speaker near a comfortable dB</li>
+          <li><strong>Overlap ducking</strong> — when 2+ people talk, soften non-dominant speakers</li>
+          <li><strong>“One speaker at a time”</strong> — gentle cue + optional earcon</li>
+          <li><strong>Live captions</strong> — who said what, with timestamps</li>
+          <li><strong>Focus mode</strong> — “What did I miss?” summary (bullets, decisions, action items)</li>
+          <li><strong>Learning loop</strong> — your feedback adjusts sensitivity for next time</li>
+        </ul>
+      </section>
+
+      <!-- 6. How it works -->
+      <section>
+        <h2>How it works</h2>
+        <div class="two-col">
+          <div>
+            <h3>Real-time pipeline</h3>
+            <ul>
+              <li>WebRTC voice room (mesh, 3–4 people)</li>
+              <li>Web Audio: <code>GainNode</code> + <code>DynamicsCompressor</code> per speaker</li>
+              <li>AudioWorklet: RMS → dB, VAD, overlap &amp; interruption detection</li>
+              <li>Shield actions: leveling, ducking, UI overlay + optional earcon</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Intelligence</h3>
+            <ul>
+              <li>Transcription (Modulate Velma) → captions + speaker labels</li>
+              <li>Summaries via Airia OpenAI Gateway → “What did I miss?”</li>
+              <li>Telemetry in Postgres → Lightdash for overlap, interruptions, improvement</li>
+              <li>ThresholdAgent: learns from feedback, proposes bounded threshold updates</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. Sponsor tech -->
+      <section>
+        <h2>Sponsor tech we use</h2>
+        <div class="sponsor-row">
+          <div class="sponsor-badge"><strong>Modulate</strong><span>Velma Transcribe — robust transcription in messy audio</span></div>
+          <div class="sponsor-badge"><strong>Airia</strong><span>OpenAI Gateway — Focus Mode summarizer</span></div>
+          <div class="sponsor-badge"><strong>Lightdash</strong><span>Metrics dashboards over session telemetry</span></div>
+        </div>
+        <p style="margin-top: 1.5em;">Plus: WebRTC, Web Audio API, Node/Next.js, Prisma, Discord bot for room links and <code>/shield</code> settings.</p>
+      </section>
+
+      <!-- 8. Demo -->
+      <section>
+        <h2>See it in action</h2>
+        <p>In the demo we show:</p>
+        <ul>
+          <li>Two (or more) browsers in one room — chaotic multi-speaker audio</li>
+          <li><strong>Overlay</strong>: “Overlap detected” + dynamic leveling in real time</li>
+          <li>User toggles: Shield ON/OFF, sensitivity, captions, “one speaker” cue, Focus mode</li>
+          <li>“What did I miss?” → 3 bullet summary via Airia</li>
+          <li>Feedback: “Too aggressive” / “Too weak” → next session uses learned thresholds</li>
+          <li>Lightdash (or seed script): session telemetry and improvement metrics</li>
+        </ul>
+        <div class="demo-frame" style="margin-top: 0.8em;">
+          <div class="overlay">[ Overlap detected — ducking active ]</div>
+          <div>Alice: "So the deadline is—" · Bob: "I think we should—"</div>
+          <div class="caption">↑ Captions + leveling make this manageable.</div>
+        </div>
+      </section>
+
+      <!-- 9. Impact -->
+      <section>
+        <h2>Impact</h2>
+        <ul>
+          <li><strong>Neurodivergent-friendly</strong> — reduce overload without changing what people say</li>
+          <li><strong>Measurable</strong> — overlap minutes, interruptions, shout spikes; compare first 30s vs last 30s per session</li>
+          <li><strong>Self-improving</strong> — sensitivity and thresholds adapt from your feedback</li>
+          <li><strong>Demoable in 3 minutes</strong> — live room + overlay + toggles + Focus summary + analytics</li>
+        </ul>
+        <div class="callout">
+          <strong>CalmCue</strong> — real-time audio UX adaptation so everyone can stay in the conversation.
+        </div>
+      </section>
+
+      <!-- 10. Thank you -->
+      <section class="title-slide">
+        <h1><span class="logo">CalmCue</span></h1>
+        <p class="tagline">Thank you.</p>
+        <p style="margin-top: 1.5em; font-size: 0.9em;">Try the room · Tweak sensitivity · Ask “What did I miss?”</p>
+        <p class="sub">Repo: CalmCue · pnpm dev → web + api + optional Discord bot</p>
+      </section>
+
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.2.1/reveal.min.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      center: false,
+      transition: 'slide',
+      transitionSpeed: 'default',
+      width: 1120,
+      height: 700,
+      margin: 0.04,
+      minScale: 0.2,
+      maxScale: 1.5,
+      slideNumber: 'c/t',
+      showSlideNumber: 'all'
+    });
+  </script>
+</body>
+</html>

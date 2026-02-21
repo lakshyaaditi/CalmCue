@@ -25,6 +25,9 @@ export default function Home() {
   const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
   const [showFocusPrompt, setShowFocusPrompt] = useState(false);
   const [recapText, setRecapText] = useState<string | null>(null);
+  const [recapBullets, setRecapBullets] = useState<string[]>([]);
+  const [recapLastSeconds, setRecapLastSeconds] = useState<number>(15);
+  const [recapSource, setRecapSource] = useState<"airia" | "fallback">("fallback");
   const [recapLoading, setRecapLoading] = useState(false);
   const [policyVersion, setPolicyVersion] = useState(1);
   const [policyExplanation, setPolicyExplanation] = useState("Default policy — no learning applied yet.");
@@ -74,6 +77,7 @@ export default function Home() {
     setToasts([]);
     setShowFocusPrompt(false);
     setRecapText(null);
+    setRecapBullets([]);
     setFeedbackCounts({ aggressive: 0, weak: 0 });
     setSessionEnded(false);
     setEndResult(null);
@@ -125,6 +129,20 @@ export default function Home() {
     audioA.src = "/demo/speakerA.wav";
     audioB.src = "/demo/speakerB.wav";
 
+    // Wait for both files to load so Speaker A and B are audible when we play
+    await Promise.all([
+      new Promise<void>((resolve, reject) => {
+        if (audioA.readyState >= 3) { resolve(); return; }
+        audioA.oncanplaythrough = () => resolve();
+        audioA.onerror = () => reject(new Error("Speaker A audio failed to load"));
+      }),
+      new Promise<void>((resolve, reject) => {
+        if (audioB.readyState >= 3) { resolve(); return; }
+        audioB.oncanplaythrough = () => resolve();
+        audioB.onerror = () => reject(new Error("Speaker B audio failed to load"));
+      }),
+    ]);
+
     const engine = new AudioEngine();
     engineRef.current = engine;
     engine.setPolicy(policy);
@@ -139,8 +157,12 @@ export default function Home() {
     // Play audio (B starts 1s later for overlap)
     audioA.currentTime = 0;
     audioB.currentTime = 0;
-    audioA.play();
-    setTimeout(() => audioB.play(), 1000);
+    const playA = audioA.play();
+    if (playA) playA.catch((e) => console.warn("Speaker A play failed:", e));
+    setTimeout(() => {
+      const playB = audioB.play();
+      if (playB) playB.catch((e) => console.warn("Speaker B play failed:", e));
+    }, 1000);
 
     sessionStartTimeRef.current = Date.now();
     setIsRunning(true);
@@ -238,23 +260,45 @@ export default function Home() {
       engineRef.current?.resetFocusPrompt();
       engineRef.current?.incrementRecaps();
 
+      const transcriptLines = visibleLines.map((l) => ({
+        ts: sessionStartTimeRef.current + l.time * 1000,
+        speaker: l.speaker,
+        text: l.text,
+      }));
+
       try {
-        const res = await fetch("/api/summarize", {
+        const res = await fetch("/api/focus-summary", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            transcriptLines: visibleLines,
-            windowSec,
+            roomId: sessionId ?? "demo",
+            userId: sessionId ?? "demo",
+            lastSeconds: windowSec,
+            transcriptLines,
           }),
         });
         const data = await res.json();
-        setRecapText(data.summary);
+        if (!res.ok) {
+          setRecapText(data.error ?? "Could not generate recap. Please try again.");
+          setRecapBullets([]);
+        } else {
+          setRecapText(data.summary);
+          setRecapBullets(data.bullets ?? []);
+          setRecapLastSeconds(windowSec);
+          setRecapSource((data.source as "airia" | "fallback") ?? "fallback");
+          if ((data.source as string) === "fallback" && data.errorMessage) {
+            addToast(data.errorMessage);
+          } else if ((data.source as string) === "fallback") {
+            addToast("Quick recap (set AIRIA_API_KEY in .env for AI summary)");
+          }
+        }
       } catch {
         setRecapText("Could not generate recap. Please try again.");
+        setRecapBullets([]);
       }
       setRecapLoading(false);
     },
-    [visibleLines]
+    [visibleLines, sessionId, addToast]
   );
 
   return (
@@ -389,8 +433,38 @@ export default function Home() {
       {(recapText || recapLoading) && (
         <RecapCard
           text={recapText}
+          bullets={recapBullets}
           loading={recapLoading}
-          onDismiss={() => setRecapText(null)}
+          onDismiss={() => {
+            setRecapText(null);
+            setRecapBullets([]);
+          }}
+          onSendToDiscord={async () => {
+            if (recapBullets.length === 0) return;
+            try {
+              const res = await fetch("/api/discord/post-focus", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  roomId: sessionId ?? "demo",
+                  userId: sessionId ?? "demo",
+                  bullets: recapBullets,
+                  lastSeconds: recapLastSeconds,
+                  source: recapSource,
+                }),
+              });
+              const data = await res.json();
+              if (res.ok && data.success) {
+                addToast("Posted to Discord channel");
+              } else if (data.configured === false) {
+                addToast("Discord not configured");
+              } else {
+                addToast("Failed to post to Discord");
+              }
+            } catch {
+              addToast("Failed to post to Discord");
+            }
+          }}
         />
       )}
     </main>

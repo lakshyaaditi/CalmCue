@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "demo:audio": "bash scripts/generate_demo_audio.sh",
+    "demo:audio:win": "npx tsx scripts/generate_demo_audio_win.ts",
     "db:seed": "npx tsx prisma/seed.ts",
     "postinstall": "prisma generate"
   },
@@ -16,7 +17,8 @@
     "next": "^15.2.0",
     "openai": "^4.85.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+"react-dom": "^19.0.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.0.0",

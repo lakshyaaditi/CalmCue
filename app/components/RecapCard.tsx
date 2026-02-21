@@ -2,12 +2,16 @@
 
 export function RecapCard({
   text,
+  bullets,
   loading,
   onDismiss,
+  onSendToDiscord,
 }: {
   text: string | null;
+  bullets: string[];
   loading: boolean;
   onDismiss: () => void;
+  onSendToDiscord?: () => void;
 }) {
   return (
     <div className="fixed bottom-4 right-4 z-40 max-w-sm w-full">
@@ -47,9 +51,24 @@ export function RecapCard({
             </span>
           </div>
         ) : (
-          <div className="text-sm whitespace-pre-wrap" style={{ color: "var(--text)" }}>
-            {text}
-          </div>
+          <>
+            <div className="text-sm whitespace-pre-wrap" style={{ color: "var(--text)" }}>
+              {text}
+            </div>
+            {bullets.length > 0 && onSendToDiscord && (
+              <button
+                type="button"
+                onClick={onSendToDiscord}
+                className="mt-3 w-full py-2 rounded-lg text-sm font-medium transition-all hover:opacity-90"
+                style={{
+                  background: "var(--accent)",
+                  color: "white",
+                }}
+              >
+                Send to Discord
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

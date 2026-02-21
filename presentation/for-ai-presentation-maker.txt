@@ -1,0 +1,118 @@
+================================================================================
+CALMCUE — CONTENT FOR PRESENTATION MAKER AI (Gamma, Canva, Beautiful.ai, etc.)
+================================================================================
+Copy everything below the dashed line into your presentation AI. Optionally paste
+the "Prompt to use" first, then the slide content.
+
+--------------------------------------------------------------------------------
+PROMPT TO USE (optional — paste this first if the tool has a description field):
+--------------------------------------------------------------------------------
+
+Create a 10-slide hackathon pitch deck from the outline below. Use a calm, professional aesthetic (teal, sage, cream). One main idea per slide; minimal text per slide. Project name: CalmCue. Tagline: Neurodivergent-friendly voice chat that reduces sensory overload via real-time audio UX adaptation.
+
+--------------------------------------------------------------------------------
+SLIDE CONTENT (copy from here down):
+--------------------------------------------------------------------------------
+
+SLIDE 1 — TITLE
+---
+Title: CalmCue
+Subtitle: Neurodivergent-friendly voice chat that reduces sensory overload via real-time audio UX adaptation.
+Footer: UPenn Hackathon · Sensory Overload Shield
+
+SLIDE 2 — HOOK
+---
+Title: The big idea
+Body: Voice chat shouldn't feel like a sensory assault.
+Subtext: We fix the sound, not the words.
+
+SLIDE 3 — THE PROBLEM
+---
+Title: The problem
+Body: Voice calls and meetings feel chaotic for many people—especially those who are neurodivergent or sensitive to auditory overload.
+Key point: It's not the words. It's the dynamics.
+Bullets:
+- Overlapping voices → hard to parse who said what
+- Shouting spikes → physically overwhelming
+- Rapid interruptions → anxiety and fatigue
+- No recap → "What did I miss?" after zoning out
+
+SLIDE 4 — WHAT WE'RE NOT DOING
+---
+Title: What we're not building
+Key point: This is NOT toxicity or content moderation. We don't classify or police what people say.
+Body: We focus only on:
+Bullets:
+- Audio dynamics (loudness, overlap, interruptions)
+- Turn-taking UX (cues, leveling, ducking)
+- Accessibility (captions, focus-mode summaries)
+Footer: So everyone can stay in the conversation without sensory overload.
+
+SLIDE 5 — THE SOLUTION
+---
+Title: The solution: CalmCue
+Body: A real-time voice room that adapts the experience—not the content.
+Bullets:
+- Dynamic leveling — keep each speaker near a comfortable volume
+- Overlap ducking — when 2+ people talk, soften non-dominant speakers
+- "One speaker at a time" — gentle cue + optional sound cue
+- Live captions — who said what, with timestamps
+- Focus mode — "What did I miss?" summary (bullets, decisions, action items)
+- Learning loop — your feedback adjusts sensitivity for next time
+
+SLIDE 6 — HOW IT WORKS
+---
+Title: How it works
+Column 1 — Real-time pipeline:
+- WebRTC voice room (3–4 people)
+- Web Audio: gain + compression per speaker
+- Audio analysis: loudness, voice activity, overlap and interruption detection
+- Shield actions: leveling, ducking, UI overlay
+Column 2 — Intelligence:
+- Transcription (Modulate Velma) → captions + speaker labels
+- Summaries via Airia OpenAI Gateway → "What did I miss?"
+- Telemetry in Postgres → Lightdash for metrics
+- ThresholdAgent: learns from feedback, proposes updated settings
+
+SLIDE 7 — SPONSOR TECH
+---
+Title: Sponsor tech we use
+Bullets:
+- Modulate (Velma Transcribe) — robust transcription in messy audio
+- Airia (OpenAI Gateway) — Focus Mode summarizer
+- Lightdash — metrics dashboards over session telemetry
+Footer: Plus WebRTC, Web Audio API, Node, Next.js, Prisma, Discord bot for room links and shield settings.
+
+SLIDE 8 — DEMO
+---
+Title: See it in action
+Body: In the demo we show:
+Bullets:
+- Two or more browsers in one room with chaotic multi-speaker audio
+- Overlay: "Overlap detected" + dynamic leveling in real time
+- User toggles: Shield ON/OFF, sensitivity, captions, one-speaker cue, Focus mode
+- "What did I miss?" → 3-bullet summary via Airia
+- Feedback buttons (Too aggressive / Too weak) → next session uses learned thresholds
+- Lightdash: session telemetry and improvement metrics
+Callout: Captions + leveling make overlapping talk manageable.
+
+SLIDE 9 — IMPACT
+---
+Title: Impact
+Bullets:
+- Neurodivergent-friendly — reduce overload without changing what people say
+- Measurable — overlap minutes, interruptions, shout spikes; compare first 30s vs last 30s per session
+- Self-improving — sensitivity and thresholds adapt from your feedback
+- Demoable in 3 minutes — live room, overlay, toggles, Focus summary, analytics
+Closing line: CalmCue — real-time audio UX adaptation so everyone can stay in the conversation.
+
+SLIDE 10 — THANK YOU
+---
+Title: CalmCue
+Subtitle: Thank you.
+Body: Try the room · Tweak sensitivity · Ask "What did I miss?"
+Footer: Repo: CalmCue · pnpm dev → web + api + optional Discord bot
+
+================================================================================
+END OF CONTENT
+================================================================================

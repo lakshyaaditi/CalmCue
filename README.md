@@ -16,7 +16,7 @@ CalmCue is NOT content moderation. It only analyzes audio dynamics and turn-taki
 | Sponsor | Integration | Fallback |
 |---------|------------|----------|
 | **Modulate** (Velma Transcribe) | POST `/api/transcribe` — batch transcription | Mock transcript JSON |
-| **Airia** (OpenAI Gateway) | POST `/api/summarize` — recap summarization | Heuristic bullet extraction |
+| **Airia** (OpenAI Gateway) | POST `/api/focus-summary` — Focus Mode recap (3 bullets) | Deterministic last-3-turns bullets |
 | **Lightdash** | SQL queries in `/lightdash/lightdash_queries.sql` | Paste into SQL Runner |
 
 ## Prerequisites (macOS)
@@ -45,7 +45,7 @@ pnpm install
 
 # 2. Set up environment variables
 cp .env.example .env
-# Edit .env to add AIRIA_API_KEY, MODULATE_API_KEY if available
+# Edit .env: AIRIA_API_KEY, AIRIA_OPENAI_BASE_URL, DISCORD_WEBHOOK_URL (see below)
 
 # 3. Start Postgres
 docker compose up -d
@@ -62,15 +62,78 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
+### Running on Windows
+
+Use these steps on **Windows (PowerShell or CMD)**:
+
+1. **Install dependencies**  
+   `pnpm install`
+
+2. **Copy env file**  
+   - **CMD:** `copy .env.example .env`  
+   - **PowerShell:** `Copy-Item .env.example .env`  
+   Then edit `.env` if you need Airia/Discord/DB.
+
+3. **Start Postgres**  
+   `docker compose up -d`  
+   (Requires Docker Desktop for Windows.)
+
+4. **Run migrations**  
+   `pnpm prisma migrate dev --name init`
+
+5. **Demo audio**  
+   - **macOS:** `pnpm demo:audio` (generates WAVs with `say`).  
+   - **Windows:** `pnpm demo:audio` does **not** work (script uses macOS-only tools). Use either:
+     - **Option A:** Run `pnpm demo:audio:win` (or `npx tsx scripts/generate_demo_audio_win.ts`) to create minimal placeholder WAVs, or  
+     - **Option B:** Copy `speakerA.wav` and `speakerB.wav` from a teammate/Mac into `public/demo/`.
+
+6. **Start dev server**  
+   `pnpm dev`  
+   Then open [http://localhost:3000](http://localhost:3000).
+
+If you skip step 5 and the WAVs are missing, **Run Demo Session** will fail when loading audio; Focus recap and other API features still work.
+
+### No sound during demo?
+
+- **WAV files:** Ensure `public/demo/speakerA.wav` and `speakerB.wav` exist. On Windows run `pnpm demo:audio:win` to generate them (then try **Run Demo Session** again).
+- **Browser:** Some browsers block audio until you’ve interacted with the page. Click once on the page (e.g. the **Run Demo Session** button), then start the demo. If it still doesn’t play, click the tab’s speaker icon and ensure the tab isn’t muted.
+- **Volume:** Check system volume and the browser tab volume (right‑click tab → Unmute site if available).
+- **Windows placeholder audio:** The Windows script creates **tones** (beeps), not speech. For real speech you’d need WAVs from a Mac (`pnpm demo:audio` there) copied into `public/demo/`.
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | Yes | `postgresql://postgres:postgres@localhost:5432/calmcue` | Postgres connection |
 | `AIRIA_API_KEY` | No | — | Airia Gateway API key for recap summarization |
-| `AIRIA_OPENAI_BASE_URL` | No | `https://api.airia.com/v1/PipelineExecution/` | Airia endpoint |
+| `AIRIA_OPENAI_BASE_URL` | No | `https://gateway.airia.ai/openai/v1` | Airia OpenAI-compatible gateway |
 | `MODULATE_API_KEY` | No | — | Modulate Velma Transcribe API key |
+| `DISCORD_WEBHOOK_URL` | No | — | Discord incoming webhook for Focus recap posts |
 | `NEXT_PUBLIC_APP_NAME` | No | `CalmCue` | App display name |
+
+## Airia Setup (Focus Mode summarizer)
+
+1. Get an API key from [Airia](https://airia.ai) (OpenAI-compatible gateway).
+2. In `.env` set:
+   - `AIRIA_API_KEY=<your-key>`
+   - `AIRIA_OPENAI_BASE_URL=https://gateway.airia.ai/openai/v1`
+3. Focus Mode uses `gpt-4o-mini` via the gateway. **You must set `AIRIA_API_KEY`** to get real AI summaries; otherwise you get a quick recap (last 3 speaker turns verbatim). If the gateway fails, the app falls back to that same quick recap. No API keys are exposed to the frontend.
+
+## Discord Setup (post recap to a channel)
+
+1. Open your **Discord server** in the app or browser.
+2. Click the server name (top-left) → **Server settings** (or right‑click server → Server settings).
+3. In the left sidebar go to **Integrations** → **Webhooks**.
+4. Click **New Webhook** (or **Create Webhook**). Name it e.g. `CalmCue Recap`, choose the **channel** where recaps should appear.
+5. Click **Copy Webhook URL**.
+6. In your CalmCue project folder open **`.env`** and add or edit:
+   ```env
+   DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+   ```
+   Paste the full URL (no quotes).
+7. Restart the dev server (`pnpm dev`). After you get a Focus recap, click **"Send to Discord"** in the Recap card; the message will appear in that channel. If `DISCORD_WEBHOOK_URL` is not set, the app shows "Discord not configured" and does not crash.
+
+**Quick test:** `POST /api/focus-summary` with `roomId`, `lastSeconds`, `transcriptLines` (each `{ ts, speaker, text }`) returns `{ summary, bullets, source }`. `POST /api/discord/post-focus` with `{ roomId, bullets }` posts to the webhook.
 
 ## 3-Minute Demo Script
 
@@ -113,8 +176,10 @@ app/
     PolicyBadge.tsx     — Policy version indicator
     SpeakerViz.tsx      — Speaker audio levels
   api/
-    summarize/route.ts  — Airia summarization
-    transcribe/route.ts — Modulate transcription
+    focus-summary/route.ts — Airia Focus Mode (3 bullets; fallback if no key)
+    discord/post-focus/   — Post recap to Discord webhook
+    summarize/route.ts    — Legacy summarization (still used by some flows)
+    transcribe/route.ts  — Modulate transcription
     session/start/      — Start session, get policy
     session/end/        — End session, compute reward, update policy
     policy/route.ts     — GET/POST policy
@@ -122,7 +187,11 @@ app/
 lib/
   audioEngine.ts        — Web Audio analysis + shield actions
   policy.ts             — Policy params + self-learning adjustment
-  summarize.ts          — Airia OpenAI SDK integration
+  summarize.ts          — Legacy Airia summarization
+  services/
+    airiaGateway.ts     — Airia Focus summary (OpenAI SDK + fallback)
+    discordWebhook.ts   — Post recap to Discord
+    airiaAgentCard.ts   — Optional AgentCard stub (feature-flagged)
   transcribe.ts         — Modulate integration
   prisma.ts             — Prisma client singleton
 
@@ -165,4 +234,3 @@ Policy parameters are versioned and persisted. After each session with feedback:
 ## License
 
 MIT
->>>>>>> f95e575 (mark-one)
