@@ -110,6 +110,8 @@ If you skip step 5 and the WAVs are missing, **Run Demo Session** will fail when
 | `MODULATE_API_KEY` | No | — | Modulate Velma Transcribe API key |
 | `DISCORD_WEBHOOK_URL` | No | — | Discord incoming webhook for Focus recap posts |
 | `NEXT_PUBLIC_APP_NAME` | No | `CalmCue` | App display name |
+| `BRAINTRUST_API_KEY` | No | — | Braintrust API key for log tracking (focus-summary, session-end) |
+| `BRAINTRUST_PROJECT` | No | `CalmCue` | Braintrust project name |
 
 ## Airia Setup (Focus Mode summarizer)
 
@@ -134,6 +136,14 @@ If you skip step 5 and the WAVs are missing, **Run Demo Session** will fail when
 7. Restart the dev server (`pnpm dev`). After you get a Focus recap, click **"Send to Discord"** in the Recap card; the message will appear in that channel. If `DISCORD_WEBHOOK_URL` is not set, the app shows "Discord not configured" and does not crash.
 
 **Quick test:** `POST /api/focus-summary` with `roomId`, `lastSeconds`, `transcriptLines` (each `{ ts, speaker, text }`) returns `{ summary, bullets, source }`. `POST /api/discord/post-focus` with `{ roomId, bullets }` posts to the webhook.
+
+## Braintrust (optional log tracking)
+
+CalmCue can send traces to [Braintrust](https://www.braintrust.dev) for observability: **focus-summary** (input/output and source) and **session-end** (reward, metrics, policy version). If `BRAINTRUST_API_KEY` is not set, logging is skipped with no errors.
+
+1. Get an API key from [Braintrust](https://www.braintrust.dev/app/token).
+2. In `.env` set `BRAINTRUST_API_KEY=<your-key>` and optionally `BRAINTRUST_PROJECT=CalmCue`.
+3. Traces appear under the project in the Braintrust dashboard (Logs / Traces).
 
 ## 3-Minute Demo Script
 
@@ -191,6 +201,7 @@ lib/
   services/
     airiaGateway.ts     — Airia Focus summary (OpenAI SDK + fallback)
     discordWebhook.ts   — Post recap to Discord
+    braintrustLogger.ts — Braintrust traces (focus-summary, session-end)
     airiaAgentCard.ts   — Optional AgentCard stub (feature-flagged)
   transcribe.ts         — Modulate integration
   prisma.ts             — Prisma client singleton

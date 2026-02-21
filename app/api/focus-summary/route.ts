@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getFocusSummary } from "@/lib/services/airiaGateway";
+import { logFocusSummary } from "@/lib/services/braintrustLogger";
 
 const FocusSummaryBodySchema = z.object({
   roomId: z.string().optional(),
@@ -30,6 +31,14 @@ export async function POST(request: Request) {
     const result = await getFocusSummary(transcriptLines, lastSeconds);
     const { bullets, source, errorMessage } = result;
     const summary = bullets.join("\n");
+
+    await logFocusSummary({
+      lastSeconds,
+      transcriptLineCount: transcriptLines.length,
+      source,
+      bulletsCount: bullets.length,
+      ...(errorMessage && { errorMessage }),
+    });
 
     return NextResponse.json({
       summary,

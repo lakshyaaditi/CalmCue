@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { adjustPolicy, DEFAULT_POLICY, type PolicyParams } from "@/lib/policy";
+import { logSessionEnd } from "@/lib/services/braintrustLogger";
 
 export async function POST(request: Request) {
   try {
@@ -71,6 +72,15 @@ export async function POST(request: Request) {
         },
       });
     }
+
+    await logSessionEnd({
+      sessionId,
+      reward,
+      overloadScore,
+      annoyanceScore,
+      metrics,
+      ...(newPolicy && { newPolicyVersion: newPolicy.version }),
+    });
 
     return NextResponse.json({
       reward,

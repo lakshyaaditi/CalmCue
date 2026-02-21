@@ -145,18 +145,23 @@ export default function Home() {
     audioBRef.current = audioB;
 
     // Wait for both files to load so Speaker A and B are audible when we play
-    await Promise.all([
-      new Promise<void>((resolve, reject) => {
-        if (audioA.readyState >= 3) { resolve(); return; }
-        audioA.oncanplaythrough = () => resolve();
-        audioA.onerror = () => reject(new Error("Speaker A audio failed to load"));
-      }),
-      new Promise<void>((resolve, reject) => {
-        if (audioB.readyState >= 3) { resolve(); return; }
-        audioB.oncanplaythrough = () => resolve();
-        audioB.onerror = () => reject(new Error("Speaker B audio failed to load"));
-      }),
-    ]);
+    try {
+      await Promise.all([
+        new Promise<void>((resolve, reject) => {
+          if (audioA.readyState >= 3) { resolve(); return; }
+          audioA.oncanplaythrough = () => resolve();
+          audioA.onerror = () => reject(new Error("Speaker A audio failed to load"));
+        }),
+        new Promise<void>((resolve, reject) => {
+          if (audioB.readyState >= 3) { resolve(); return; }
+          audioB.oncanplaythrough = () => resolve();
+          audioB.onerror = () => reject(new Error("Speaker B audio failed to load"));
+        }),
+      ]);
+    } catch (e) {
+      addToast("Demo audio missing or failed. Run: pnpm demo:audio:win");
+      return;
+    }
 
     const engine = new AudioEngine();
     engineRef.current = engine;
@@ -173,10 +178,10 @@ export default function Home() {
     audioA.currentTime = 0;
     audioB.currentTime = 0;
     const playA = audioA.play();
-    if (playA) playA.catch((e) => console.warn("Speaker A play failed:", e));
+    if (playA) playA.catch(() => addToast("Audio blocked. Click the page once, then Run Demo again."));
     setTimeout(() => {
       const playB = audioB.play();
-      if (playB) playB.catch((e) => console.warn("Speaker B play failed:", e));
+      if (playB) playB.catch(() => addToast("Audio blocked. Click the page once, then Run Demo again."));
     }, 1000);
 
     sessionStartTimeRef.current = Date.now();
