@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0f0f14;
+  --surface: #1a1a24;
+  --surface2: #252534;
+  --border: #2e2e42;
+  --text: #e4e4ef;
+  --text-muted: #8888a0;
+  --accent: #7c6ef0;
+  --accent-light: #a59cf8;
+  --green: #4ade80;
+  --yellow: #facc15;
+  --red: #f87171;
+  --orange: #fb923c;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Toast animation */
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideOut {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+.toast-enter { animation: slideIn 0.3s ease-out; }
+.toast-exit { animation: slideOut 0.3s ease-in; }
+
+/* Chaos meter glow */
+.chaos-glow {
+  box-shadow: 0 0 20px rgba(124, 110, 240, 0.3);
+}
+.chaos-danger {
+  box-shadow: 0 0 30px rgba(248, 113, 113, 0.4);
+}
+
+/* Pulse animation for focus prompt */
+@keyframes pulse-border {
+  0%, 100% { border-color: var(--accent); }
+  50% { border-color: var(--orange); }
+}
+.pulse-border { animation: pulse-border 1.5s ease-in-out infinite; }

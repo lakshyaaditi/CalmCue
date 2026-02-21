@@ -1,0 +1,398 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AudioEngine, type EngineState } from "@/lib/audioEngine";
+import { type PolicyParams, DEFAULT_POLICY } from "@/lib/policy";
+import { TranscriptPanel } from "./components/TranscriptPanel";
+import { ChaosMeter } from "./components/ChaosMeter";
+import { ToastStack } from "./components/ToastStack";
+import { FocusPrompt } from "./components/FocusPrompt";
+import { RecapCard } from "./components/RecapCard";
+import { PolicyBadge } from "./components/PolicyBadge";
+import { SpeakerViz } from "./components/SpeakerViz";
+
+interface TranscriptLine {
+  time: number;
+  speaker: string;
+  text: string;
+}
+
+export default function Home() {
+  const [isRunning, setIsRunning] = useState(false);
+  const [engineState, setEngineState] = useState<EngineState | null>(null);
+  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
+  const [visibleLines, setVisibleLines] = useState<TranscriptLine[]>([]);
+  const [toasts, setToasts] = useState<{ id: number; msg: string }[]>([]);
+  const [showFocusPrompt, setShowFocusPrompt] = useState(false);
+  const [recapText, setRecapText] = useState<string | null>(null);
+  const [recapLoading, setRecapLoading] = useState(false);
+  const [policyVersion, setPolicyVersion] = useState(1);
+  const [policyExplanation, setPolicyExplanation] = useState("Default policy — no learning applied yet.");
+  const [policy, setPolicy] = useState<PolicyParams>(DEFAULT_POLICY);
+  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [feedbackCounts, setFeedbackCounts] = useState({ aggressive: 0, weak: 0 });
+  const [sessionEnded, setSessionEnded] = useState(false);
+  const [endResult, setEndResult] = useState<{
+    reward: number;
+    newPolicy?: { version: number; explanation: string } | null;
+  } | null>(null);
+
+  const engineRef = useRef<AudioEngine | null>(null);
+  const audioARef = useRef<HTMLAudioElement | null>(null);
+  const audioBRef = useRef<HTMLAudioElement | null>(null);
+  const toastIdRef = useRef(0);
+  const transcriptTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionStartTimeRef = useRef<number>(0);
+
+  // Load policy on mount
+  useEffect(() => {
+    fetch("/api/policy")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.params) {
+          setPolicy(data.params);
+          setPolicyVersion(data.version);
+          setPolicyExplanation(data.explanation);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const addToast = useCallback((msg: string) => {
+    const id = ++toastIdRef.current;
+    setToasts((prev) => [...prev, { id, msg }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 5000);
+  }, []);
+
+  const startDemo = useCallback(async () => {
+    // Reset state
+    setEngineState(null);
+    setTranscript([]);
+    setVisibleLines([]);
+    setToasts([]);
+    setShowFocusPrompt(false);
+    setRecapText(null);
+    setFeedbackCounts({ aggressive: 0, weak: 0 });
+    setSessionEnded(false);
+    setEndResult(null);
+
+    // Fetch transcript
+    let transcriptData: TranscriptLine[] = [];
+    try {
+      const res = await fetch("/api/transcribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      transcriptData = data.entries || [];
+    } catch {
+      transcriptData = [];
+    }
+    setTranscript(transcriptData);
+
+    // Start session in DB
+    let sid: string | null = null;
+    try {
+      const res = await fetch("/api/session/start", { method: "POST" });
+      const data = await res.json();
+      sid = data.sessionId;
+      if (data.policyJson) {
+        setPolicy(data.policyJson as PolicyParams);
+        setPolicyVersion(data.policyVersion);
+      }
+    } catch {
+      // Continue without DB
+    }
+    setSessionId(sid);
+
+    // Reload policy
+    try {
+      const res = await fetch("/api/policy");
+      const data = await res.json();
+      if (data.params) {
+        setPolicy(data.params);
+        setPolicyVersion(data.version);
+        setPolicyExplanation(data.explanation);
+      }
+    } catch {}
+
+    // Init audio engine
+    const audioA = audioARef.current!;
+    const audioB = audioBRef.current!;
+    audioA.src = "/demo/speakerA.wav";
+    audioB.src = "/demo/speakerB.wav";
+
+    const engine = new AudioEngine();
+    engineRef.current = engine;
+    engine.setPolicy(policy);
+
+    engine.onStateUpdate((state) => setEngineState(state));
+    engine.onToastCue((msg) => addToast(msg));
+    engine.onFocusPromptCue(() => setShowFocusPrompt(true));
+
+    await engine.init(audioA, audioB);
+    engine.start();
+
+    // Play audio (B starts 1s later for overlap)
+    audioA.currentTime = 0;
+    audioB.currentTime = 0;
+    audioA.play();
+    setTimeout(() => audioB.play(), 1000);
+
+    sessionStartTimeRef.current = Date.now();
+    setIsRunning(true);
+
+    // Feed transcript lines based on playback time
+    const startTime = Date.now();
+    transcriptTimerRef.current = setInterval(() => {
+      const elapsed = (Date.now() - startTime) / 1000;
+      const visible = transcriptData.filter((l) => l.time <= elapsed);
+      setVisibleLines(visible);
+    }, 300);
+
+    // Auto-stop when audio ends
+    const onEnded = () => {
+      if (!audioA.paused && !audioB.paused) return; // one still playing
+      // Both done
+    };
+    audioA.addEventListener("ended", onEnded);
+    audioB.addEventListener("ended", onEnded);
+  }, [addToast, policy]);
+
+  const endSession = useCallback(async () => {
+    // Stop engine
+    engineRef.current?.stop();
+    audioARef.current?.pause();
+    audioBRef.current?.pause();
+    if (transcriptTimerRef.current) clearInterval(transcriptTimerRef.current);
+
+    setIsRunning(false);
+    setSessionEnded(true);
+
+    if (!sessionId || !engineRef.current) return;
+
+    const metrics = engineRef.current.getSessionMetrics();
+    try {
+      const res = await fetch("/api/session/end", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId,
+          metrics: {
+            ...metrics,
+            feedbackTooAggressiveCount: feedbackCounts.aggressive,
+            feedbackTooWeakCount: feedbackCounts.weak,
+          },
+        }),
+      });
+      const data = await res.json();
+      setEndResult(data);
+      if (data.newPolicy) {
+        setPolicyVersion(data.newPolicy.version);
+        setPolicyExplanation(data.newPolicy.explanation);
+        setPolicy(data.newPolicy.params);
+        // Also save to localStorage
+        localStorage.setItem("calmcue_policy", JSON.stringify(data.newPolicy));
+      }
+    } catch (e) {
+      console.error("Failed to end session:", e);
+    }
+  }, [sessionId, feedbackCounts]);
+
+  const handleFeedback = useCallback(
+    (type: "aggressive" | "weak") => {
+      setFeedbackCounts((prev) => ({
+        aggressive: type === "aggressive" ? prev.aggressive + 1 : prev.aggressive,
+        weak: type === "weak" ? prev.weak + 1 : prev.weak,
+      }));
+      addToast(type === "aggressive" ? "Noted: shields too aggressive" : "Noted: shields too weak");
+
+      // Persist feedback to DB
+      if (sessionId) {
+        fetch("/api/session/end", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sessionId,
+            metrics: {
+              ...engineRef.current?.getSessionMetrics(),
+              feedbackTooAggressiveCount:
+                feedbackCounts.aggressive + (type === "aggressive" ? 1 : 0),
+              feedbackTooWeakCount:
+                feedbackCounts.weak + (type === "weak" ? 1 : 0),
+            },
+          }),
+        }).catch(() => {});
+      }
+    },
+    [addToast, sessionId, feedbackCounts]
+  );
+
+  const requestRecap = useCallback(
+    async (windowSec: number) => {
+      setRecapLoading(true);
+      setShowFocusPrompt(false);
+      engineRef.current?.resetFocusPrompt();
+      engineRef.current?.incrementRecaps();
+
+      try {
+        const res = await fetch("/api/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            transcriptLines: visibleLines,
+            windowSec,
+          }),
+        });
+        const data = await res.json();
+        setRecapText(data.summary);
+      } catch {
+        setRecapText("Could not generate recap. Please try again.");
+      }
+      setRecapLoading(false);
+    },
+    [visibleLines]
+  );
+
+  return (
+    <main className="min-h-screen p-4 md:p-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <header className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight" style={{ color: "var(--accent-light)" }}>
+            CalmCue
+          </h1>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Neurodivergent-friendly voice chat UX
+          </p>
+        </div>
+        <PolicyBadge version={policyVersion} explanation={policyExplanation} />
+      </header>
+
+      {/* Hidden audio elements */}
+      <audio ref={audioARef} crossOrigin="anonymous" preload="auto" />
+      <audio ref={audioBRef} crossOrigin="anonymous" preload="auto" />
+
+      {/* Controls */}
+      <div className="flex items-center gap-3 mb-6">
+        {!isRunning && !sessionEnded && (
+          <button
+            onClick={startDemo}
+            className="px-6 py-3 rounded-lg font-semibold text-white transition-all hover:scale-105"
+            style={{ background: "var(--accent)" }}
+          >
+            Run Demo Session
+          </button>
+        )}
+        {isRunning && (
+          <>
+            <button
+              onClick={endSession}
+              className="px-6 py-3 rounded-lg font-semibold transition-all hover:scale-105"
+              style={{ background: "var(--surface2)", border: "1px solid var(--border)" }}
+            >
+              End Session
+            </button>
+            <button
+              onClick={() => handleFeedback("aggressive")}
+              className="px-4 py-2 rounded-lg text-sm transition-all hover:scale-105"
+              style={{ background: "var(--surface2)", border: "1px solid var(--red)", color: "var(--red)" }}
+            >
+              Too Aggressive
+            </button>
+            <button
+              onClick={() => handleFeedback("weak")}
+              className="px-4 py-2 rounded-lg text-sm transition-all hover:scale-105"
+              style={{ background: "var(--surface2)", border: "1px solid var(--yellow)", color: "var(--yellow)" }}
+            >
+              Too Weak
+            </button>
+          </>
+        )}
+        {sessionEnded && !isRunning && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setSessionEnded(false);
+                setEndResult(null);
+                startDemo();
+              }}
+              className="px-6 py-3 rounded-lg font-semibold text-white transition-all hover:scale-105"
+              style={{ background: "var(--accent)" }}
+            >
+              Run Demo Session Again
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Session end results */}
+      {endResult && (
+        <div
+          className="mb-6 p-4 rounded-lg border"
+          style={{ background: "var(--surface)", borderColor: "var(--accent)" }}
+        >
+          <h3 className="font-semibold mb-2" style={{ color: "var(--accent-light)" }}>
+            Session Results
+          </h3>
+          <p className="text-sm mb-1">
+            Reward: <span className="font-mono">{endResult.reward.toFixed(2)}</span>
+          </p>
+          <p className="text-sm mb-1">
+            Feedback: {feedbackCounts.aggressive} too aggressive, {feedbackCounts.weak} too weak
+          </p>
+          {endResult.newPolicy && (
+            <div className="mt-2 p-3 rounded" style={{ background: "var(--surface2)" }}>
+              <p className="text-sm font-semibold" style={{ color: "var(--green)" }}>
+                Policy updated to v{endResult.newPolicy.version}
+              </p>
+              <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+                {endResult.newPolicy.explanation}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Main grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Left: Speaker visualizations + Chaos meter */}
+        <div className="lg:col-span-1 space-y-4">
+          <SpeakerViz speakers={engineState?.speakers} isOverlapping={engineState?.isOverlapping ?? false} />
+          <ChaosMeter metrics={engineState?.metrics ?? null} policy={policy} />
+        </div>
+
+        {/* Right: Transcript */}
+        <div className="lg:col-span-2">
+          <TranscriptPanel lines={visibleLines} />
+        </div>
+      </div>
+
+      {/* Toast stack */}
+      <ToastStack toasts={toasts} onDismiss={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} />
+
+      {/* Focus mode prompt */}
+      {showFocusPrompt && (
+        <FocusPrompt
+          onRecap={requestRecap}
+          onDismiss={() => {
+            setShowFocusPrompt(false);
+            engineRef.current?.resetFocusPrompt();
+          }}
+        />
+      )}
+
+      {/* Recap card */}
+      {(recapText || recapLoading) && (
+        <RecapCard
+          text={recapText}
+          loading={recapLoading}
+          onDismiss={() => setRecapText(null)}
+        />
+      )}
+    </main>
+  );
+}

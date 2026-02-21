@@ -1,0 +1,57 @@
+"use client";
+
+export function RecapCard({
+  text,
+  loading,
+  onDismiss,
+}: {
+  text: string | null;
+  loading: boolean;
+  onDismiss: () => void;
+}) {
+  return (
+    <div className="fixed bottom-4 right-4 z-40 max-w-sm w-full">
+      <div
+        className="rounded-xl p-4 shadow-lg border"
+        style={{
+          background: "var(--surface)",
+          borderColor: "var(--accent)",
+        }}
+      >
+        <div className="flex items-center justify-between mb-2">
+          <h3
+            className="text-sm font-semibold uppercase tracking-wider"
+            style={{ color: "var(--accent-light)" }}
+          >
+            Focus Recap
+          </h3>
+          <button
+            onClick={onDismiss}
+            className="text-xs px-2 py-1 rounded"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Dismiss
+          </button>
+        </div>
+        {loading ? (
+          <div className="flex items-center gap-2">
+            <div
+              className="w-4 h-4 border-2 rounded-full animate-spin"
+              style={{
+                borderColor: "var(--accent)",
+                borderTopColor: "transparent",
+              }}
+            />
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+              Generating recap...
+            </span>
+          </div>
+        ) : (
+          <div className="text-sm whitespace-pre-wrap" style={{ color: "var(--text)" }}>
+            {text}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Policy {
+  id         String   @id @default(cuid())
+  version    Int      @unique
+  policyJson Json
+  explanation String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("policies")
+}
+
+model Session {
+  id                String     @id @default(cuid())
+  policyVersionUsed Int        @map("policy_version_used")
+  metricsJson       Json       @map("metrics_json")
+  reward            Float
+  createdAt         DateTime   @default(now()) @map("created_at")
+  feedback          Feedback[]
+
+  @@map("sessions")
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  sessionId String   @map("session_id")
+  type      String   // "too_aggressive" | "too_weak"
+  createdAt DateTime @default(now()) @map("created_at")
+  session   Session  @relation(fields: [sessionId], references: [id])
+
+  @@map("feedback")
+}
