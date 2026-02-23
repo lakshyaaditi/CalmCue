@@ -4,29 +4,6 @@
  * No content moderation; summarization only. No API keys in frontend.
  */
 
-import * as fs from "fs";
-import * as path from "path";
-
-function loadEnvVarFromFile(name: string): string {
-  try {
-    const envPath = path.join(process.cwd(), ".env");
-    if (!fs.existsSync(envPath)) return "";
-    const content = fs.readFileSync(envPath, "utf-8");
-    const line = content.split("\n").find((l) => l.startsWith(name + "="));
-    if (!line) return "";
-    const eq = line.indexOf("=");
-    let raw = line.slice(eq + 1).trim();
-    if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1).trim();
-    else if (raw.startsWith("'") && raw.endsWith("'")) raw = raw.slice(1, -1).trim();
-    return raw.replace(/\r/g, "");
-  } catch {
-    return "";
-  }
-}
-
-function loadAiriaKeyFromEnvFile(): string {
-  return loadEnvVarFromFile("AIRIA_API_KEY");
-}
 
 /** Remove Airia's <airiaThinking> block so we show only the actual summary, not the agent's reasoning */
 function stripAiriaThinking(content: string): string {
@@ -132,16 +109,9 @@ export async function getFocusSummary(
   transcriptLines: FocusTranscriptLine[],
   lastSeconds: number
 ): Promise<{ bullets: string[]; source: "airia" | "fallback"; errorMessage?: string }> {
-  // Always read key from .env file so keys containing "=" are not truncated
-  let apiKey = loadAiriaKeyFromEnvFile();
-  if (!apiKey) {
-    apiKey = process.env.AIRIA_API_KEY?.trim() ?? "";
-    if (apiKey.startsWith('"') && apiKey.endsWith('"')) apiKey = apiKey.slice(1, -1).trim();
-    if (apiKey.startsWith("'") && apiKey.endsWith("'")) apiKey = apiKey.slice(1, -1).trim();
-  }
-  apiKey = apiKey.replace(/\r/g, "").trim();
-  const pipelineUrl = (process.env.AIRIA_PIPELINE_URL ?? loadEnvVarFromFile("AIRIA_PIPELINE_URL")).trim();
-  const baseURL = (process.env.AIRIA_OPENAI_BASE_URL ?? loadEnvVarFromFile("AIRIA_OPENAI_BASE_URL") ?? "https://gateway.airia.ai/openai/v1").trim();
+  const apiKey = (process.env.AIRIA_API_KEY?.trim() ?? "").replace(/\r/g, "");
+  const pipelineUrl = (process.env.AIRIA_PIPELINE_URL?.trim() ?? "");
+  const baseURL = (process.env.AIRIA_OPENAI_BASE_URL?.trim() ?? "https://gateway.airia.ai/openai/v1");
 
   if (!apiKey) {
     return {

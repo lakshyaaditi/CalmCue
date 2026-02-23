@@ -30,6 +30,9 @@ importers:
         specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
+      '@netlify/plugin-nextjs':
+        specifier: ^5.15.8
+        version: 5.15.8
       '@tailwindcss/postcss':
         specifier: ^4.0.0
         version: 4.2.0
@@ -402,6 +405,10 @@ packages:
 
   '@kwsites/promise-deferred@1.1.1':
     resolution: {integrity: sha512-GaHYm+c0O9MjZRu0ongGBRbinu8gVAMd2UZjji6jVmqKtZluZnptXGWhz1E8j8D2HJ3f/yMxKAUC0b+57wncIw==}
+
+  '@netlify/plugin-nextjs@5.15.8':
+    resolution: {integrity: sha512-zxHVtYhNV1ixLX/4xX6PFTxpM5ltfQIMXUo0JbppUWvDaYeeZIqoEmlYdfIHx6BKyjLSMm8D/b3IRReK5VYuyA==}
+    engines: {node: '>=18.0.0'}
 
   '@next/env@14.2.35':
     resolution: {integrity: sha512-DuhvCtj4t9Gwrx80dmz2F4t/zKQ4ktN8WrMwOuVzkJfBilwAwGr6v16M5eI8yCuZ63H9TTuEU09Iu2HqkzFPVQ==}
@@ -1693,6 +1700,8 @@ snapshots:
       - supports-color
 
   '@kwsites/promise-deferred@1.1.1': {}
+
+  '@netlify/plugin-nextjs@5.15.8': {}
 
   '@next/env@14.2.35': {}
 

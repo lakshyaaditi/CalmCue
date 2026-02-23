@@ -36,5 +36,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# cached transcription
-public/demo/transcript_cache.json
+# Note: transcript_cache.json is intentionally tracked so the cached
+# Modulate transcription deploys with the app (better than mock fallback)

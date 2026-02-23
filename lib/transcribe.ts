@@ -129,9 +129,13 @@ export async function transcribe(): Promise<TranscriptEntry[]> {
     try {
       const entries = await modulateTranscribeBoth();
       if (entries.length > 0) {
-        // Persist to cache
-        fs.writeFileSync(CACHE_PATH, JSON.stringify(entries, null, 2));
-        console.log(`[Modulate] Cached ${entries.length} entries to ${CACHE_PATH}`);
+        // Try to persist to cache (will fail silently on read-only serverless filesystems)
+        try {
+          fs.writeFileSync(CACHE_PATH, JSON.stringify(entries, null, 2));
+          console.log(`[Modulate] Cached ${entries.length} entries to ${CACHE_PATH}`);
+        } catch {
+          console.log(`[Modulate] Cache write skipped (read-only filesystem)`);
+        }
         return entries;
       }
     } catch (e) {

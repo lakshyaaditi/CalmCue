@@ -11,7 +11,8 @@
       "Bash(winget install:*)",
       "Bash(export:*)",
       "Bash(tail:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(npx prisma generate:*)"
     ]
   }
 }

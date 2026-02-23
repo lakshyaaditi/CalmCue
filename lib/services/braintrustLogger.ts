@@ -4,37 +4,14 @@
  * Reads API key from .env file so it is not truncated (e.g. keys containing "=").
  */
 
-import * as fs from "fs";
-import * as path from "path";
 import { initLogger } from "braintrust";
 
-function loadEnvFromFile(name: string): string {
-  try {
-    const envPath = path.join(process.cwd(), ".env");
-    if (!fs.existsSync(envPath)) return "";
-    const content = fs.readFileSync(envPath, "utf-8");
-    const line = content.split("\n").find((l) => l.startsWith(name + "="));
-    if (!line) return "";
-    const eq = line.indexOf("=");
-    let raw = line.slice(eq + 1).trim();
-    if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1).trim();
-    else if (raw.startsWith("'") && raw.endsWith("'")) raw = raw.slice(1, -1).trim();
-    return raw.replace(/\r/g, "");
-  } catch {
-    return "";
-  }
-}
-
 function getApiKey(): string {
-  const fromFile = loadEnvFromFile("BRAINTRUST_API_KEY").trim();
-  const fromEnv = process.env.BRAINTRUST_API_KEY?.trim() ?? "";
-  return fromFile || fromEnv;
+  return process.env.BRAINTRUST_API_KEY?.trim() ?? "";
 }
 
 function getProject(): string {
-  const fromFile = loadEnvFromFile("BRAINTRUST_PROJECT").trim();
-  const fromEnv = process.env.BRAINTRUST_PROJECT?.trim() ?? "";
-  return (fromFile || fromEnv || "CalmCue");
+  return process.env.BRAINTRUST_PROJECT?.trim() || "CalmCue";
 }
 
 let loggerInstance: ReturnType<typeof initLogger> | null = null;
